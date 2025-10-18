@@ -1,29 +1,33 @@
-name: Daily Balance Notify
+name: Daily DESCO Check
 
 on:
-  # Cron runs at 02:00 UTC every day -> Dhaka (UTC+6) = 08:00
   schedule:
-    - cron: '0 2 * * *'
-  workflow_dispatch: {}  # Manual run option from GitHub UI
+    - cron: "5 2 * * *"    # 02:05 UTC = 08:05 Dhaka (avoid top of hour)
+  workflow_dispatch:        # allow manual run from Actions tab
 
 jobs:
-  notify:
+  run:
     runs-on: ubuntu-latest
+    concurrency:
+      group: desco-daily
+      cancel-in-progress: false
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
+          cache: "pip"
 
-      - name: Install dependencies
-        run: pip install requests python-dotenv
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Run notify script
+      - name: Run checker
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          ACCOUNT_NO: ${{ secrets.ACCOUNT_NO }}
+          ACCOUNT_NO: ${{ secrets.ACCOUNT_NO }}   # e.g., 500
         run: python check_balance.py
