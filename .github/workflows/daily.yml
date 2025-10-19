@@ -2,7 +2,7 @@ name: Daily DESCO Check
 
 on:
   schedule:
-    - cron: "5 18 * * *"    # 02:05 UTC = 08:05 Dhaka (avoid top of hour)
+    - cron: "5 3 * * *"    # 03:05 UTC = 09:05 Dhaka (avoid top of hour)
   workflow_dispatch:        # allow manual run from Actions tab
 
 jobs:
